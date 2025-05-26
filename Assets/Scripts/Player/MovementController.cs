@@ -1,45 +1,82 @@
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class MovementController : MonoBehaviour
 {
-    [SerializeField] private float speed;
-    [SerializeField] private float sensitivity;
+    [SerializeField] private float speed = 5f; 
+    [SerializeField] private float rotationSpeed = 10f; 
 
     private Rigidbody rb;
     private Animator anim;
 
-    private Vector3 input;
-    private float mouseInput;
+    private Vector3 inputMovement; 
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
         anim = GetComponent<Animator>();
     }
+
     private void Update()
     {
         GetInput();
         UpdateAnimations();
-        RotateChar();
-        
     }
-    private void RotateChar()
+
+    private void FixedUpdate()
     {
-        if (Input.GetMouseButton(1))
+        MoveCharacter();
+        RotateCharacterToMoveDirection();
+    }
+
+    private void GetInput()
+    {
+       
+        inputMovement.x = Input.GetAxis("Vertical");   
+
+        
+        inputMovement.z = -Input.GetAxis("Horizontal"); 
+
+       
+        inputMovement.y = 0; 
+
+       
+        if (inputMovement.magnitude > 1f)
         {
-            mouseInput = Input.GetAxis("Mouse X");
-            transform.Rotate(Vector3.up * mouseInput * sensitivity);
-            Cursor.lockState = CursorLockMode.Locked;
-        }
-        else if (Input.GetMouseButtonUp(1))
-        {
-            Cursor.lockState = CursorLockMode.None;
+            inputMovement.Normalize();
         }
     }
+
+    private void MoveCharacter()
+    {
+       
+        Vector3 moveVelocity = inputMovement * speed * Time.fixedDeltaTime;
+        rb.MovePosition(rb.position + moveVelocity);
+    }
+
+    private void RotateCharacterToMoveDirection()
+    {
+      
+        if (inputMovement != Vector3.zero)
+        {
+           
+            Vector3 targetDirection = inputMovement;
+            targetDirection.y = 0; 
+
+          
+            Quaternion targetRotation = Quaternion.LookRotation(targetDirection);
+
+            
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.fixedDeltaTime);
+        }
+    }
+
     private void UpdateAnimations()
     {
-        if (input != Vector3.zero)
+        
+        if (inputMovement.magnitude > 0.01f) 
         {
             anim.SetBool("isMoving", true);
         }
@@ -47,15 +84,5 @@ public class MovementController : MonoBehaviour
         {
             anim.SetBool("isMoving", false);
         }
-    }
-    private void GetInput()
-    {
-        input.z = Input.GetAxis("Vertical");
-        input.x = Input.GetAxis("Horizontal");
-    }
-    private void FixedUpdate()
-    {
-        rb.MovePosition(transform.position + transform.TransformDirection(input)*speed*Time.fixedDeltaTime);
-        //rb.velocity += ((transform.forward * input.z) + (transform.right * input.x))*speed; kayarak gitsin istiyorsan aç
     }
 }
