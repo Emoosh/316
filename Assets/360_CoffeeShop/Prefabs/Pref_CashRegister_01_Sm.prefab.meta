@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 8cc7a1a02d4b0c9448493113f90d1fb6
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 286768
+  packageName: 360 CoffeeShop
+  packageVersion: 1.0
+  assetPath: Assets/360_CoffeeShop/Prefabs/Pref_CashRegister_01_Sm.prefab
+  uploadId: 669356
