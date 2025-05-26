@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 81b2fcdab8ed3594883beb99b6bcd60b
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 112000000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 286768
+  packageName: 360 CoffeeShop
+  packageVersion: 1.0
+  assetPath: Assets/360_CoffeeShop/Scenes/360_CoffeeShop_01/LightingData.asset
+  uploadId: 669356
