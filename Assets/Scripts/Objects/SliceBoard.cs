@@ -29,6 +29,14 @@ public class SliceBoard : Functionality,IPutItemFull
             timer.UpdateClock(currentTime, maxTime);
             switch (currentType)
             {
+                case ItemType.MILKCUP: 
+                    return ItemType.LATTE;
+                case ItemType.MILK: 
+                    return ItemType.MILKCUP;
+                case ItemType.GROUNDCOFFEE: 
+                    return ItemType.ESPRESSOMODEL;
+                case ItemType.COFFEE1: 
+                    return ItemType.GROUNDCOFFEE;
                 case ItemType.TOMATO: 
                     return ItemType.SLICEDTOM;
                 case ItemType.LETTUCE:  
@@ -71,6 +79,11 @@ public class SliceBoard : Functionality,IPutItemFull
     { 
         switch (type)
         {
+
+            case ItemType.MILKCUP:
+            case ItemType.MILK:
+            case ItemType.GROUNDCOFFEE:
+            case ItemType.COFFEE1:
             case ItemType.TOMATO:
             case ItemType.LETTUCE:
             case ItemType.ONION:
