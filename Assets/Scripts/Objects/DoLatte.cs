@@ -2,123 +2,97 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DoLatte: Functionality, IPutItemFull
+public class DoLatte : Functionality, IPutItemFull
 {
-    [SerializeField] private List<ObjectnType> itemsToHold = new List<ObjectnType>();
-    private ItemType currentType;
-    private ItemType waitingItem; // Yeni eklendi
+    [SerializeField] private GameObject espressoObj;
+    [SerializeField] private GameObject milkcupObj;
+
+    private ItemType firstItem = ItemType.NONE;
+    private ItemType secondItem = ItemType.NONE;
+    private bool espressoPlaced = false;
+    private bool processStarted = false;
 
     private void Start()
     {
-        currentType = ItemType.NONE;
-        waitingItem = ItemType.NONE;
-        timer.gameObject.SetActive(false);
-    }
+        firstItem = ItemType.NONE;
+        secondItem = ItemType.NONE;
+        if (timer != null) timer.gameObject.SetActive(false);
 
-    public override ItemType Process()
-    {
-        if (currentType == ItemType.NONE) return ItemType.NONE;
-        if (processStarted == true && timer.gameObject.activeSelf == false)
-        {
-            timer.gameObject.SetActive(true);
-        }
-        processStarted = true;
-        currentTime += Time.deltaTime;
-        timer.UpdateClock(currentTime, maxTime);
-        if (currentTime >= maxTime)
-        {
-            currentTime = 0;
-            timer.gameObject.SetActive(false);
-            processStarted = false;
-            timer.UpdateClock(currentTime, maxTime);
-            switch (currentType)
-            {
-                case ItemType.MILKCUP:
-                    return ItemType.LATTE;
-                case ItemType.MILK:
-                    return ItemType.MILKCUP;
-                case ItemType.GROUNDCOFFEE:
-                    return ItemType.ESPRESSOMODEL;
-                case ItemType.COFFEE1:
-                    return ItemType.GROUNDCOFFEE;
-                case ItemType.TOMATO:
-                    return ItemType.SLICEDTOM;
-                case ItemType.LETTUCE:
-                    return ItemType.SLICEDLET;
-                case ItemType.ONION:
-                    return ItemType.SLICEDON;
-                case ItemType.CHEESE:
-                    return ItemType.SLICEDCHE;
-                case ItemType.BREAD:
-                    return ItemType.SLICEDBREAD;
-            }
-        }
-        return ItemType.NONE;
-    }
-
-    public override void ClearObject()
-    {
-        base.ClearObject();
-        currentType = ItemType.NONE;
-        waitingItem = ItemType.NONE;
-        itemsToHold.ForEach(obj => obj.item.SetActive(false));
+        // Başlangıçta görselleri kapat
+        if (espressoObj != null) espressoObj.SetActive(false);
+        if (milkcupObj != null) milkcupObj.SetActive(false);
     }
 
     public bool PutItem(ItemType item)
     {
-        if (!FilterItem(item)) return false;
+        if (processStarted) return false;
 
-        if (waitingItem == ItemType.NONE)
+        if (!espressoPlaced && item == ItemType.ESPRESSOMODEL)
         {
-            waitingItem = item;
-            ShowItem(item);
+            firstItem = item;
+            espressoPlaced = true;
+            if (espressoObj != null) espressoObj.SetActive(true);
             return true;
         }
-
-        if (waitingItem != ItemType.NONE && currentType == ItemType.NONE)
+        else if (espressoPlaced && item == ItemType.MILKCUP)
         {
-            currentType = CombineItems(waitingItem, item);
-            waitingItem = ItemType.NONE;
-            ShowItem(currentType);
+            secondItem = item;
+            if (milkcupObj != null) milkcupObj.SetActive(true);
+            processStarted = true;
+            StartCoroutine(MakeLatte());
             return true;
         }
 
         return false;
     }
 
-    private bool FilterItem(ItemType type)
+    private IEnumerator MakeLatte()
     {
-        switch (type)
+        if (timer != null) timer.gameObject.SetActive(true);
+
+        float currentTime = 0;
+        float maxTime = 2f;
+        while (currentTime < maxTime)
         {
-            case ItemType.MILKCUP:
-            case ItemType.MILK:
-            case ItemType.GROUNDCOFFEE:
-            case ItemType.COFFEE1:
-            case ItemType.TOMATO:
-            case ItemType.LETTUCE:
-            case ItemType.ONION:
-            case ItemType.CHEESE:
-            case ItemType.BREAD: return true;
-            default: return false;
+            currentTime += Time.deltaTime;
+            if (timer != null) timer.UpdateClock(currentTime, maxTime);
+            yield return null;
         }
+
+        if (timer != null) timer.gameObject.SetActive(false);
+
+        // Latte oluştur
+        if (GameObject.FindObjectOfType<Inventory>() != null)
+        {
+            Inventory inv = GameObject.FindObjectOfType<Inventory>();
+            inv.TakeItem(ItemType.LATTE);
+        }
+
+        // Görselleri kapat
+        if (espressoObj != null) espressoObj.SetActive(false);
+        if (milkcupObj != null) milkcupObj.SetActive(false);
+
+        // Reset
+        espressoPlaced = false;
+        processStarted = false;
+        firstItem = ItemType.NONE;
+        secondItem = ItemType.NONE;
     }
 
-    private ItemType CombineItems(ItemType first, ItemType second)
+    public override ItemType Process()
     {
-        if ((first == ItemType.MILKCUP && second == ItemType.ESPRESSOMODEL) ||
-            (first == ItemType.ESPRESSOMODEL && second == ItemType.MILKCUP))
-        {
-            return ItemType.LATTE;
-        }
-
-        return first;
+        return ItemType.NONE; // burada bir şey dönülmeyecek çünkü coroutine ile işlem yapılıyor
     }
 
-    private void ShowItem(ItemType type)
+    public override void ClearObject()
     {
-        foreach (ObjectnType itemHold in itemsToHold)
-        {
-            itemHold.item.SetActive(itemHold.type == type);
-        }
+        // Latte üretildikten sonra çağrılabilir
+        firstItem = ItemType.NONE;
+        secondItem = ItemType.NONE;
+        espressoPlaced = false;
+        processStarted = false;
+
+        if (espressoObj != null) espressoObj.SetActive(false);
+        if (milkcupObj != null) milkcupObj.SetActive(false);
     }
 }
