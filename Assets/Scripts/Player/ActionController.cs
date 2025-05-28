@@ -102,17 +102,29 @@ public class ActionController : MonoBehaviour
 
     }
     private void OnTriggerStay(Collider other)
+{
+    if (!CanBeSold(inventory.CurrentType)) return;
+
+    if (other.gameObject.CompareTag("SellArea"))
     {
-        if (inventory.CurrentType != ItemType.HAMBURGER) return;
-        if (other.gameObject.CompareTag("SellArea"))
+        if (Input.GetMouseButtonDown(0))
         {
-            if (Input.GetMouseButtonDown(0))
-            {
-                CustomerManager.Instance.SellToCustomer();
-                inventory.ClearHand();
-            }
+            CustomerManager.Instance.SellToCustomer();
+            inventory.ClearHand();
         }
     }
+}
+
+private bool CanBeSold(ItemType type)
+{
+        return  type == ItemType.HAMBURGER ||
+                type == ItemType.ESPRESSOMODEL ||
+                type == ItemType.LATTE ||
+                type == ItemType.CAKE ||
+                type == ItemType.AMERICANO ||
+                type == ItemType.TEAFULL;
+}
+
     private IEnumerator canPutCoolDown()
     {
         canPut = false;
@@ -120,3 +132,4 @@ public class ActionController : MonoBehaviour
         canPut = true;
     }
 } 
+
